@@ -1,66 +1,118 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth";
+import AuthShell from "@/components/auth/AuthShell";
+import TextField from "@/components/auth/TextField";
+import FormBanner from "@/components/auth/FormBanner";
+import { signIn, friendlyAuthError } from "@/lib/auth";
+
+interface FieldErrors {
+  email?: string;
+  password?: string;
+}
 
 export default function SignInPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
+  function validate(): FieldErrors {
+    const errors: FieldErrors = {};
+    if (!email.trim()) errors.email = "Please enter your email.";
+    if (!password) errors.password = "Please enter your password.";
+    return errors;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setFormError("");
+
+    const errors = validate();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email.trim(), password);
     setLoading(false);
-    if (error) return setError(error.message);
+
+    if (error) {
+      setFormError(friendlyAuthError(error.message));
+      return;
+    }
+
     router.push("/today");
     router.refresh();
   }
 
   return (
-    <div className="min-h-full flex flex-col justify-center px-6 py-10">
-      <h1 className="font-[family-name:var(--font-heading)] text-[26px] text-[var(--color-ink)] mb-1">
-        Welcome back
-      </h1>
-      <p className="text-sm text-[var(--color-ink-muted)] mb-6">Sign in to your account.</p>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Sign in to pick up your reading plan, notes and giving history."
+      footer={
+        <div className="space-y-4">
+          <p className="text-center text-sm text-[var(--color-ink-muted)]">
+            No account yet?{" "}
+            <Link href="/sign-up" className="font-semibold text-[var(--color-gold)]">
+              Create one
+            </Link>
+          </p>
+          <Link
+            href="/today"
+            className="block text-center text-sm font-medium text-[var(--color-ink-muted)] underline"
+          >
+            Continue without an account
+          </Link>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {formError && <FormBanner tone="error">{formError}</FormBanner>}
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input
+        <TextField
+          label="Email"
           type="email"
-          placeholder="Email"
+          inputMode="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-[var(--color-border)] rounded-xl p-3.5 bg-[var(--color-card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-gold)]/30"
-          required
+          onChange={setEmail}
+          placeholder="you@example.com"
+          autoComplete="email"
+          error={fieldErrors.email}
+          disabled={loading}
         />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-[var(--color-border)] rounded-xl p-3.5 bg-[var(--color-card)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-gold)]/30"
-          required
-        />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <div>
+          <TextField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="current-password"
+            error={fieldErrors.password}
+            disabled={loading}
+          />
+          <div className="mt-2 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-[var(--color-gold)]"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        </div>
+
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[var(--color-gold)] text-white rounded-xl p-3.5 font-semibold shadow-sm disabled:opacity-60"
+          className="w-full rounded-xl bg-[var(--color-gold)] p-3.5 text-sm font-semibold text-white shadow-sm transition-opacity disabled:opacity-60"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
-
-      <p className="text-sm text-[var(--color-ink-muted)] mt-5 text-center">
-        No account?{" "}
-        <a href="/sign-up" className="text-[var(--color-gold)] font-semibold">
-          Sign up
-        </a>
-      </p>
-    </div>
+    </AuthShell>
   );
 }
