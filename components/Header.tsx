@@ -1,23 +1,18 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { Shield } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { useProfile } from "@/lib/useProfile";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Shield, UserRound } from "lucide-react";
+import { useProfile, initialsFor } from "@/lib/useProfile";
 
 export default function Header() {
-  const { userId, email, loading } = useProfile();
-  const router = useRouter();
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/today");
-    router.refresh();
-  }
+  const { userId, email, fullName, loading } = useProfile();
+  const pathname = usePathname();
+  const onProfile = pathname?.startsWith("/profile");
 
   return (
     <header className="safe-top shrink-0 bg-[var(--color-bg-dark)] text-white">
-      <div className="h-14 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex h-14 items-center justify-between px-4">
+        <Link href="/today" className="flex min-w-0 items-center gap-2">
           <Shield
             size={18}
             className="shrink-0"
@@ -25,32 +20,26 @@ export default function Header() {
             fill="var(--color-gold)"
             fillOpacity={0.15}
           />
-          <span className="font-[family-name:var(--font-heading)] text-sm leading-none tracking-wide truncate">
+          <span className="truncate font-[family-name:var(--font-heading)] text-sm leading-none tracking-wide">
             Guardian&apos;s Embrace
           </span>
-        </div>
+        </Link>
 
         {loading ? (
-          <div className="w-16 h-6 shrink-0" />
-        ) : userId ? (
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="hidden sm:inline text-xs text-[var(--color-gold)] max-w-[100px] truncate">
-              {email}
-            </span>
-            <button
-              onClick={handleSignOut}
-              className="text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
+          <div className="h-9 w-9 shrink-0 rounded-full bg-white/10" />
         ) : (
-          <a
-            href="/sign-in"
-            className="shrink-0 text-xs px-3 py-1.5 rounded-full bg-[var(--color-gold)] text-white font-semibold"
+          <Link
+            href="/profile"
+            aria-label={userId ? "Your profile" : "Sign in"}
+            aria-current={onProfile ? "page" : undefined}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+              userId
+                ? "bg-[var(--color-gold)] text-white"
+                : "border border-white/25 text-white hover:bg-white/10"
+            } ${onProfile ? "ring-2 ring-white/60" : ""}`}
           >
-            Sign in
-          </a>
+            {userId ? initialsFor(fullName, email) : <UserRound size={18} />}
+          </Link>
         )}
       </div>
     </header>
