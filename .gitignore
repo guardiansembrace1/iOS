@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated from the `kjv` package by scripts/build-bible.mjs
+/public/bible/
