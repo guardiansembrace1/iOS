@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 
+const ZEFFY_URL = "https://www.zeffy.com/en-US/donation-form/guardians-embrace-child-sponsorships";
+
 export default function GivePage() {
   const [amount, setAmount] = useState(50);
   const amounts = [25, 50, 100];
@@ -33,7 +35,9 @@ export default function GivePage() {
       </div>
 
       <a
-        href="#"
+        href={ZEFFY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         className="block text-center bg-[var(--color-success)] text-white rounded-xl p-3.5 font-semibold mb-5 shadow-sm"
       >
         {`Give $${amount} securely`}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 const journey = [
@@ -39,7 +40,10 @@ export default function MissionPage() {
         ))}
       </ol>
 
-      <button className="w-full bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-4 text-left flex justify-between items-center mb-3">
+      <Link
+        href="/mission/beliefs"
+        className="w-full bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-sm p-4 text-left flex justify-between items-center mb-3"
+      >
         <div>
           <p className="font-semibold text-[var(--color-ink)] text-sm">What we believe</p>
           <p className="text-xs text-[var(--color-ink-muted)]">
@@ -47,15 +51,15 @@ export default function MissionPage() {
           </p>
         </div>
         <ChevronRight size={18} color="var(--color-gold)" />
-      </button>
+      </Link>
 
-      <a
+      <Link
         href="/volunteer-apply"
         className="block w-full bg-[var(--color-bg-dark)] rounded-2xl p-4 text-center"
       >
         <p className="font-semibold text-white text-sm">Volunteer with us</p>
         <p className="text-xs text-white/60 mt-0.5">Applications reviewed by staff</p>
-      </a>
+      </Link>
     </div>
   );
 }
